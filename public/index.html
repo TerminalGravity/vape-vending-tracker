@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VapeVend Pro - Arizona</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #0f172a; color: white; font-family: system-ui, -apple-system, sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .priority-a-plus { border-left: 4px solid #22c55e; }
+        .priority-a { border-left: 4px solid #3b82f6; }
+        .priority-b { border-left: 4px solid #eab308; }
+        .tab-active { background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+        .subtab-active { background: #3b82f6; }
+        input[type="range"] { -webkit-appearance: none; height: 8px; border-radius: 4px; background: #334155; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #3b82f6; cursor: pointer; }
+        .number-input { -moz-appearance: textfield; }
+        .number-input::-webkit-outer-spin-button, .number-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .profit { color: #22c55e; }
+        .loss { color: #ef4444; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div id="app">
+        <!-- Header -->
+        <header class="glass border-b border-slate-700 px-4 md:px-6 py-4 sticky top-0 z-40">
+            <div class="flex items-center justify-between max-w-7xl mx-auto">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-xl">🚬</div>
+                    <div>
+                        <h1 class="text-lg font-bold bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">VapeVend Pro</h1>
+                        <p class="text-xs text-slate-400">Arizona Operations</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="showQuickCall()" class="p-2 rounded-lg bg-green-600 hover:bg-green-700 transition" title="Quick Call">
+                        <i class="fas fa-phone"></i>
+                    </button>
+                    <button onclick="showScripts()" class="p-2 rounded-lg bg-purple-600 hover:bg-purple-700 transition" title="Scripts">
+                        <i class="fas fa-scroll"></i>
+                    </button>
+                    <button onclick="showProducts()" class="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition" title="Products">
+                        <i class="fas fa-box"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Nav -->
+        <nav class="glass border-b border-slate-700 px-4 overflow-x-auto sticky top-[72px] z-30">
+            <div class="flex gap-1 max-w-7xl mx-auto py-2">
+                <button onclick="showPage('dashboard')" id="nav-dashboard" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap tab-active">
+                    <i class="fas fa-chart-line mr-2"></i>Dashboard
+                </button>
+                <button onclick="showPage('prospects')" id="nav-prospects" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap hover:bg-slate-700">
+                    <i class="fas fa-store mr-2"></i>Prospects
+                </button>
+                <button onclick="showPage('pipeline')" id="nav-pipeline" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap hover:bg-slate-700">
+                    <i class="fas fa-filter-circle-dollar mr-2"></i>Pipeline
+                </button>
+                <button onclick="showPage('calculator')" id="nav-calculator" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap hover:bg-slate-700">
+                    <i class="fas fa-calculator mr-2"></i>Calculator
+                </button>
+            </div>
+        </nav>
+
+        <!-- Content -->
+        <main class="p-4 md:p-6 max-w-7xl mx-auto">
+            <!-- Dashboard Page -->
+            <div id="page-dashboard">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="glass rounded-2xl p-5 border border-slate-700">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-slate-400 text-sm">Pipeline</span>
+                            <i class="fas fa-dollar-sign text-green-400"></i>
+                        </div>
+                        <p class="text-3xl font-bold" id="kpi-pipeline">$0</p>
+                        <p class="text-xs text-slate-500 mt-1">potential monthly</p>
+                    </div>
+                    <div class="glass rounded-2xl p-5 border border-slate-700">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-slate-400 text-sm">Active Deals</span>
+                            <i class="fas fa-handshake text-blue-400"></i>
+                        </div>
+                        <p class="text-3xl font-bold" id="kpi-active">0</p>
+                        <p class="text-xs text-slate-500 mt-1">in progress</p>
+                    </div>
+                    <div class="glass rounded-2xl p-5 border border-slate-700">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-slate-400 text-sm">Won</span>
+                            <i class="fas fa-trophy text-yellow-400"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-green-400" id="kpi-won">0</p>
+                        <p class="text-xs text-green-600 mt-1" id="kpi-won-rev">$0/mo locked</p>
+                    </div>
+                    <div class="glass rounded-2xl p-5 border border-slate-700">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-slate-400 text-sm">Conversion</span>
+                            <i class="fas fa-percentage text-purple-400"></i>
+                        </div>
+                        <p class="text-3xl font-bold" id="kpi-conversion">0%</p>
+                        <p class="text-xs text-slate-500 mt-1">close rate</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="glass rounded-2xl p-6 border border-slate-700">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2">
+                            <i class="fas fa-chart-area text-green-400"></i>Revenue Projection
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-400">If you close top 5:</span>
+                                <span class="text-2xl font-bold text-green-400" id="proj-top5">$0/mo</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-400">Annual net (40% margin, 20% split):</span>
+                                <span class="text-xl font-bold" id="proj-annual">$0</span>
+                            </div>
+                            <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
+                                <div id="proj-bar" class="h-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-6 border border-slate-700">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2">
+                            <i class="fas fa-bolt text-yellow-400"></i>Today's Priority Actions
+                        </h3>
+                        <div id="today-actions" class="space-y-2 max-h-[200px] overflow-y-auto"></div>
+                    </div>
+                </div>
+
+                <div class="glass rounded-2xl p-6 border border-slate-700">
+                    <h3 class="font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-map-marked-alt text-blue-400"></i>Pipeline by Area
+                    </h3>
+                    <div id="area-breakdown" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+                </div>
+            </div>
+
+            <!-- Prospects Page -->
+            <div id="page-prospects" class="hidden">
+                <div class="glass rounded-xl p-4 mb-4 flex flex-wrap gap-3 items-center">
+                    <div class="flex-1 min-w-[200px]">
+                        <input type="text" id="search-input" placeholder="Search bars..." oninput="renderProspects()" 
+                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-sm focus:border-blue-500 focus:outline-none">
+                    </div>
+                    <select id="filter-area" onchange="renderProspects()" class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm">
+                        <option value="all">All Areas</option>
+                    </select>
+                    <select id="filter-priority" onchange="renderProspects()" class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm">
+                        <option value="all">All Priority</option>
+                        <option value="A+">A+ Only</option>
+                        <option value="A">A Only</option>
+                        <option value="B">B Only</option>
+                    </select>
+                    <select id="filter-status" onchange="renderProspects()" class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm">
+                        <option value="all">All Status</option>
+                    </select>
+                    <span class="text-slate-400 text-sm" id="filter-count"></span>
+                </div>
+                <div id="prospect-list" class="space-y-3"></div>
+            </div>
+
+            <!-- Pipeline Page -->
+            <div id="page-pipeline" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4" id="pipeline-board"></div>
+            </div>
+
+            <!-- Calculator Page - NEW TABBED VERSION -->
+            <div id="page-calculator" class="hidden">
+                <!-- Calculator Sub-tabs -->
+                <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+                    <button onclick="showCalcTab('whatif')" id="calc-tab-whatif" class="calc-subtab px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap subtab-active">
+                        <i class="fas fa-flask mr-2"></i>What-If Analysis
+                    </button>
+                    <button onclick="showCalcTab('pipeline-pl')" id="calc-tab-pipeline-pl" class="calc-subtab px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-slate-700 hover:bg-slate-600">
+                        <i class="fas fa-chart-pie mr-2"></i>Pipeline P/L
+                    </button>
+                    <button onclick="showCalcTab('costs')" id="calc-tab-costs" class="calc-subtab px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-slate-700 hover:bg-slate-600">
+                        <i class="fas fa-receipt mr-2"></i>Cost Breakdown
+                    </button>
+                    <button onclick="showCalcTab('products')" id="calc-tab-products" class="calc-subtab px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-slate-700 hover:bg-slate-600">
+                        <i class="fas fa-boxes mr-2"></i>Product Margins
+                    </button>
+                    <button onclick="showCalcTab('machines')" id="calc-tab-machines" class="calc-subtab px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-slate-700 hover:bg-slate-600">
+                        <i class="fas fa-server mr-2"></i>VapeTM Machines
+                    </button>
+                </div>
+
+                <!-- What-If Analysis Tab -->
+                <div id="calc-whatif">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Scenario Builder -->
+                        <div class="glass rounded-2xl p-6 border border-slate-700">
+                            <h3 class="font-semibold mb-4 flex items-center gap-2">
+                                <i class="fas fa-sliders-h text-blue-400"></i>Scenario Builder
+                            </h3>
+                            <div class="space-y-5">
+                                <div>
+                                    <label class="block text-sm text-slate-400 mb-2">Number of Machines</label>
+                                    <div class="flex gap-2">
+                                        <input type="number" id="wif-machines" value="5" min="1" max="50" onchange="updateWhatIf()" 
+                                            class="number-input flex-1 bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 focus:border-blue-500 focus:outline-none">
+                                        <input type="range" id="wif-machines-range" min="1" max="50" value="5" oninput="document.getElementById('wif-machines').value=this.value; updateWhatIf()" class="flex-1">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-slate-400 mb-2">Machine Type</label>
+                                    <select id="wif-machine-type" onchange="updateWhatIf()" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2">
+                                        <optgroup label="Wall-Mounted">
+                                            <option value="2850">Mini Wall - Most Compact ($2,850)</option>
+                                            <option value="3450">Slim Wall - Sleek ($3,450)</option>
+                                            <option value="3500">Slim Wall Tin Lift - Pouches ($3,500)</option>
+                                            <option value="3900">Mega Wall - High Capacity ($3,900)</option>
+                                            <option value="3950">Mega Wall 2.0 - High Capacity ($3,950)</option>
+                                        </optgroup>
+                                        <optgroup label="Towers">
+                                            <option value="4500">Slim Tower - Free Standing ($4,500)</option>
+                                            <option value="5000" selected>Slim Tower 2.0 - 43" Touch ($5,000)</option>
+                                            <option value="5000">Slim Pack Tower 2.0 ($5,000)</option>
+                                            <option value="6200">Mega Tower - Large ($6,200)</option>
+                                            <option value="6200">Mega Tower Smart - 32" Touch ($6,200)</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-slate-400 mb-2">Avg Monthly Revenue per Machine: $<span id="wif-rev-val">1200</span></label>
+                                    <input type="range" id="wif-revenue" min="400" max="2500" step="50" value="1200" oninput="document.getElementById('wif-rev-val').textContent=this.value; updateWhatIf()" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-slate-400 mb-2">Product Margin (COGS): <span id="wif-cogs-val">35</span>%</label>
+                                    <input type="range" id="wif-cogs" min="20" max="50" value="35" oninput="document.getElementById('wif-cogs-val').textContent=this.value; updateWhatIf()" class="w-full">
+                                    <p class="text-xs text-slate-500 mt-1">% of revenue spent on inventory</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-slate-400 mb-2">Avg Bar Split: <span id="wif-split-val">20</span>%</label>
+                                    <input type="range" id="wif-split" min="0" max="50" step="5" value="20" oninput="document.getElementById('wif-split-val').textContent=this.value; updateWhatIf()" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-slate-400 mb-2">Monthly Operating Costs</label>
+                                    <input type="number" id="wif-opcosts" value="200" min="0" step="50" onchange="updateWhatIf()" 
+                                        class="number-input w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2">
+                                    <p class="text-xs text-slate-500 mt-1">Gas, payment processing, misc</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Results -->
+                        <div class="space-y-6">
+                            <!-- Startup Costs -->
+                            <div class="glass rounded-2xl p-6 border border-orange-700">
+                                <h3 class="font-semibold mb-4 text-orange-400 flex items-center gap-2">
+                                    <i class="fas fa-rocket"></i>Startup Investment
+                                </h3>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between"><span class="text-slate-400">Machines (<span id="wif-num">5</span>x)</span><span id="wif-machine-cost">$25,000</span></div>
+                                    <div class="flex justify-between"><span class="text-slate-400">Initial Inventory (2 fills)</span><span id="wif-inv-cost">$2,100</span></div>
+                                    <div class="flex justify-between"><span class="text-slate-400">TPT License</span><span>$12</span></div>
+                                    <div class="flex justify-between"><span class="text-slate-400">Signage (per AZ law)</span><span id="wif-sign-cost">$100</span></div>
+                                    <div class="flex justify-between"><span class="text-slate-400">Card Reader/Setup</span><span id="wif-card-cost">$500</span></div>
+                                    <div class="flex justify-between border-t border-slate-600 pt-2 mt-2">
+                                        <span class="font-medium">Total Startup</span>
+                                        <span class="font-bold text-orange-400" id="wif-total-startup">$27,712</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Monthly P/L -->
+                            <div class="glass rounded-2xl p-6 border border-slate-700">
+                                <h3 class="font-semibold mb-4 flex items-center gap-2">
+                                    <i class="fas fa-calendar-alt text-blue-400"></i>Monthly P/L
+                                </h3>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between"><span class="text-slate-400">Gross Revenue</span><span class="font-medium" id="wif-gross">$6,000</span></div>
+                                    <div class="flex justify-between text-red-400"><span>- COGS (<span id="wif-cogs-pct">35</span>%)</span><span id="wif-cogs-amt">-$2,100</span></div>
+                                    <div class="flex justify-between"><span class="text-slate-400">= Gross Profit</span><span id="wif-gp">$3,900</span></div>
+                                    <div class="flex justify-between text-red-400"><span>- Bar Splits (<span id="wif-split-pct">20</span>%)</span><span id="wif-split-amt">-$780</span></div>
+                                    <div class="flex justify-between text-red-400"><span>- Operating Costs</span><span id="wif-op-amt">-$200</span></div>
+                                    <div class="flex justify-between border-t border-slate-600 pt-2 mt-2">
+                                        <span class="font-medium">Net Profit</span>
+                                        <span class="font-bold text-green-400 text-lg" id="wif-net">$2,920</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Annual & ROI -->
+                            <div class="glass rounded-2xl p-6 border border-green-700">
+                                <h3 class="font-semibold mb-4 text-green-400 flex items-center gap-2">
+                                    <i class="fas fa-chart-line"></i>Annual & ROI
+                                </h3>
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Annual Net Profit</span>
+                                        <span class="font-bold text-xl text-green-400" id="wif-annual">$35,040</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Payback Period</span>
+                                        <span class="font-bold" id="wif-payback">9.5 months</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Year 1 ROI</span>
+                                        <span class="font-bold" id="wif-roi1">26%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Year 2+ ROI</span>
+                                        <span class="font-bold text-green-400" id="wif-roi2">126%</span>
+                                    </div>
+                                    <div class="h-3 bg-slate-700 rounded-full overflow-hidden mt-2">
+                                        <div id="wif-roi-bar" class="h-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all" style="width: 50%"></div>
+                                    </div>
+                                    <p class="text-xs text-slate-500 text-center">Profit margin: <span id="wif-margin-pct">49%</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pipeline P/L Tab -->
+                <div id="calc-pipeline-pl" class="hidden">
+                    <div class="glass rounded-2xl p-6 border border-slate-700 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold flex items-center gap-2">
+                                <i class="fas fa-chart-pie text-purple-400"></i>Pipeline Profit/Loss Analysis
+                            </h3>
+                            <span class="text-sm text-slate-400">Based on configured deals</span>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-4">This shows projected P/L for deals in your pipeline with their configured machine types and splits.</p>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="glass rounded-xl p-4 border border-slate-700">
+                            <p class="text-slate-400 text-xs mb-1">Total Startup Cost</p>
+                            <p class="text-2xl font-bold text-orange-400" id="pl-startup">$0</p>
+                        </div>
+                        <div class="glass rounded-xl p-4 border border-slate-700">
+                            <p class="text-slate-400 text-xs mb-1">Monthly Revenue</p>
+                            <p class="text-2xl font-bold" id="pl-monthly-rev">$0</p>
+                        </div>
+                        <div class="glass rounded-xl p-4 border border-slate-700">
+                            <p class="text-slate-400 text-xs mb-1">Monthly Net</p>
+                            <p class="text-2xl font-bold text-green-400" id="pl-monthly-net">$0</p>
+                        </div>
+                        <div class="glass rounded-xl p-4 border border-slate-700">
+                            <p class="text-slate-400 text-xs mb-1">Annual Net</p>
+                            <p class="text-2xl font-bold text-green-400" id="pl-annual">$0</p>
+                        </div>
+                    </div>
+
+                    <!-- Deal-by-Deal Table -->
+                    <div class="glass rounded-2xl border border-slate-700 overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-slate-800">
+                                    <tr class="text-left text-slate-400">
+                                        <th class="p-4">Location</th>
+                                        <th class="p-4">Status</th>
+                                        <th class="p-4">Machine</th>
+                                        <th class="p-4 text-right">Machine Cost</th>
+                                        <th class="p-4 text-right">Est. Revenue</th>
+                                        <th class="p-4 text-right">Split</th>
+                                        <th class="p-4 text-right">Monthly Net</th>
+                                        <th class="p-4 text-right">Payback</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pl-table"></tbody>
+                                <tfoot class="bg-slate-800 font-bold">
+                                    <tr>
+                                        <td class="p-4" colspan="3">TOTALS</td>
+                                        <td class="p-4 text-right" id="pl-total-machine">$0</td>
+                                        <td class="p-4 text-right" id="pl-total-rev">$0</td>
+                                        <td class="p-4 text-right">-</td>
+                                        <td class="p-4 text-right text-green-400" id="pl-total-net">$0</td>
+                                        <td class="p-4 text-right" id="pl-avg-payback">-</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cost Breakdown Tab -->
+                <div id="calc-costs" class="hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Startup Costs -->
+                        <div class="glass rounded-2xl p-6 border border-orange-700">
+                            <h3 class="font-semibold mb-4 text-orange-400 flex items-center gap-2">
+                                <i class="fas fa-rocket"></i>One-Time Startup Costs
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                                    <div>
+                                        <p class="font-medium">Vending Machine</p>
+                                        <p class="text-xs text-slate-400">Wall mount or tower style</p>
+                                    </div>
+                                    <span class="font-bold">$2,700 - $5,000</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                                    <div>
+                                        <p class="font-medium">Initial Inventory</p>
+                                        <p class="text-xs text-slate-400">2 full fills recommended</p>
+                                    </div>
+                                    <span class="font-bold">$400 - $600</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                                    <div>
+                                        <p class="font-medium">TPT License (AZ)</p>
+                                        <p class="text-xs text-slate-400">Transaction Privilege Tax</p>
+                                    </div>
+                                    <span class="font-bold">$12</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                                    <div>
+                                        <p class="font-medium">Signage (AZ Required)</p>
+                                        <p class="text-xs text-slate-400">80 sq in, 21+ warning</p>
+                                    </div>
+                                    <span class="font-bold">$15 - $30</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                                    <div>
+                                        <p class="font-medium">Card Reader Setup</p>
+                                        <p class="text-xs text-slate-400">Nayax or similar</p>
+                                    </div>
+                                    <span class="font-bold">$0 - $100</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                                    <div>
+                                        <p class="font-medium">LLC Formation</p>
+                                        <p class="text-xs text-slate-400">Already done via ZenBusiness</p>
+                                    </div>
+                                    <span class="font-bold text-green-400">✓ Done</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-slate-600">
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Total per Machine</span>
+                                    <span class="font-bold text-orange-400">$3,127 - $5,742</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monthly Costs -->
+                        <div class="glass rounded-2xl p-6 border border-blue-700">
+                            <h3 class="font-semibold mb-4 text-blue-400 flex items-center gap-2">
+                                <i class="fas fa-sync"></i>Recurring Monthly Costs
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                                    <div>
+                                        <p class="font-medium">Inventory Restock</p>
+                                        <p class="text-xs text-slate-400">~35% of revenue (COGS)</p>
+                                    </div>
+                                    <span class="font-bold">$350 - $500</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                                    <div>
+                                        <p class="font-medium">Bar Profit Split</p>
+                                        <p class="text-xs text-slate-400">15-25% of gross profit</p>
+                                    </div>
+                                    <span class="font-bold">$70 - $200</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                                    <div>
+                                        <p class="font-medium">Card Processing</p>
+                                        <p class="text-xs text-slate-400">~3-4% of transactions</p>
+                                    </div>
+                                    <span class="font-bold">$30 - $50</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                                    <div>
+                                        <p class="font-medium">Telemetry/Connectivity</p>
+                                        <p class="text-xs text-slate-400">Remote monitoring</p>
+                                    </div>
+                                    <span class="font-bold">$15 - $25</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                                    <div>
+                                        <p class="font-medium">Gas/Travel</p>
+                                        <p class="text-xs text-slate-400">Restocking trips</p>
+                                    </div>
+                                    <span class="font-bold">$20 - $50</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                                    <div>
+                                        <p class="font-medium">Insurance</p>
+                                        <p class="text-xs text-slate-400">Optional but recommended</p>
+                                    </div>
+                                    <span class="font-bold">$25 - $50</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-slate-600">
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Total Monthly per Machine</span>
+                                    <span class="font-bold text-blue-400">$510 - $875</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profit Margins Reference -->
+                        <div class="lg:col-span-2 glass rounded-2xl p-6 border border-green-700">
+                            <h3 class="font-semibold mb-4 text-green-400 flex items-center gap-2">
+                                <i class="fas fa-percentage"></i>Typical Profit Margins
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-slate-800 rounded-xl p-4 text-center">
+                                    <p class="text-3xl font-bold text-red-400">35%</p>
+                                    <p class="text-sm text-slate-400">COGS (Cost of Goods)</p>
+                                    <p class="text-xs text-slate-500">Vapes, pouches, accessories</p>
+                                </div>
+                                <div class="bg-slate-800 rounded-xl p-4 text-center">
+                                    <p class="text-3xl font-bold text-yellow-400">15-25%</p>
+                                    <p class="text-sm text-slate-400">Bar Split (of gross profit)</p>
+                                    <p class="text-xs text-slate-500">Negotiated per location</p>
+                                </div>
+                                <div class="bg-slate-800 rounded-xl p-4 text-center">
+                                    <p class="text-3xl font-bold text-green-400">40-52%</p>
+                                    <p class="text-sm text-slate-400">Your Net Margin</p>
+                                    <p class="text-xs text-slate-500">After all costs & splits</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Margins Tab -->
+                <div id="calc-products" class="hidden">
+                    <!-- Wholesale Suppliers -->
+                    <div class="glass rounded-2xl p-6 border border-blue-700 mb-6">
+                        <h3 class="font-semibold mb-4 text-blue-400 flex items-center gap-2">
+                            <i class="fas fa-truck"></i>Verified Wholesale Suppliers
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <a href="https://smokedirect.com" target="_blank" class="bg-slate-800 rounded-xl p-4 hover:bg-slate-700 transition block">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-10 h-10 rounded-lg bg-green-600 flex items-center justify-center"><i class="fas fa-cloud"></i></div>
+                                    <div>
+                                        <p class="font-semibold">SmokeDirect</p>
+                                        <p class="text-xs text-slate-400">VapeTM Recommended</p>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-slate-300">Disposable vapes $7-12 wholesale</p>
+                                <p class="text-xs text-green-400 mt-2"><i class="fas fa-external-link-alt mr-1"></i>smokedirect.com</p>
+                            </a>
+                            <a href="https://nicokick.com/us/nicotine-pouches" target="_blank" class="bg-slate-800 rounded-xl p-4 hover:bg-slate-700 transition block">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center"><i class="fas fa-box"></i></div>
+                                    <div>
+                                        <p class="font-semibold">Nicokick</p>
+                                        <p class="text-xs text-slate-400">Nicotine Pouches</p>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-slate-300">Zyn, On!, Velo, Rogue pouches</p>
+                                <p class="text-xs text-green-400 mt-2"><i class="fas fa-external-link-alt mr-1"></i>nicokick.com</p>
+                            </a>
+                            <a href="https://alibaba.com/showroom/disposable-camera-bulk.html" target="_blank" class="bg-slate-800 rounded-xl p-4 hover:bg-slate-700 transition block">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-10 h-10 rounded-lg bg-orange-600 flex items-center justify-center"><i class="fas fa-globe"></i></div>
+                                    <div>
+                                        <p class="font-semibold">Alibaba</p>
+                                        <p class="text-xs text-slate-400">Accessories Bulk</p>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-slate-300">Cameras $5-8, chargers $2-4</p>
+                                <p class="text-xs text-green-400 mt-2"><i class="fas fa-external-link-alt mr-1"></i>alibaba.com</p>
+                            </a>
+                            <a href="https://vapetm.com" target="_blank" class="bg-slate-800 rounded-xl p-4 hover:bg-slate-700 transition block">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center"><i class="fas fa-store"></i></div>
+                                    <div>
+                                        <p class="font-semibold">VapeTM</p>
+                                        <p class="text-xs text-slate-400">Machines + Products</p>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-slate-300">Morning Recovery, supplies</p>
+                                <p class="text-xs text-green-400 mt-2"><i class="fas fa-external-link-alt mr-1"></i>vapetm.com</p>
+                            </a>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-4"><i class="fas fa-info-circle mr-1"></i>Call VapeTM at 888-537-8273 for wholesale account setup with SmokeDirect</p>
+                    </div>
+
+                    <!-- Product Catalog Table -->
+                    <div class="glass rounded-2xl p-6 border border-slate-700 mb-6">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2">
+                            <i class="fas fa-boxes text-green-400"></i>Product Catalog & Margins
+                        </h3>
+                        <p class="text-slate-400 text-sm mb-4">Real wholesale costs with supplier links. Target: 200%+ markup on vapes, 300%+ on accessories.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="text-left text-slate-400 border-b border-slate-700">
+                                        <th class="pb-3">Product</th>
+                                        <th class="pb-3">Category</th>
+                                        <th class="pb-3">Supplier</th>
+                                        <th class="pb-3 text-right">Wholesale</th>
+                                        <th class="pb-3 text-right">Sell Price</th>
+                                        <th class="pb-3 text-right">Profit</th>
+                                        <th class="pb-3 text-right">Margin</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="product-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pricing Strategy -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="glass rounded-2xl p-6 border border-purple-700">
+                            <h3 class="font-semibold mb-4 text-purple-400 flex items-center gap-2">
+                                <i class="fas fa-lightbulb"></i>Pricing Strategy
+                            </h3>
+                            <ul class="space-y-3 text-sm text-slate-300">
+                                <li class="flex gap-2"><i class="fas fa-check text-green-400 mt-1"></i><strong>Price 15-25% above 7-Eleven</strong> — drunk people pay for convenience</li>
+                                <li class="flex gap-2"><i class="fas fa-check text-green-400 mt-1"></i><strong>Round to whole dollars</strong> — $28 → $30, easier transactions</li>
+                                <li class="flex gap-2"><i class="fas fa-check text-green-400 mt-1"></i><strong>Impulse = price insensitive</strong> — they need it NOW</li>
+                                <li class="flex gap-2"><i class="fas fa-check text-green-400 mt-1"></i><strong>Late night = no alternatives</strong> — monopoly pricing power</li>
+                                <li class="flex gap-2"><i class="fas fa-check text-green-400 mt-1"></i><strong>Test & adjust</strong> — raise prices until sales slow</li>
+                            </ul>
+                        </div>
+                        <div class="glass rounded-2xl p-6 border border-yellow-700">
+                            <h3 class="font-semibold mb-4 text-yellow-400 flex items-center gap-2">
+                                <i class="fas fa-star"></i>Highest Margin Items
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center bg-slate-800 rounded-lg p-3">
+                                    <span>Advil 2-pack</span>
+                                    <span class="text-green-400 font-bold">1300% margin</span>
+                                </div>
+                                <div class="flex justify-between items-center bg-slate-800 rounded-lg p-3">
+                                    <span>USB Charger</span>
+                                    <span class="text-green-400 font-bold">700% margin</span>
+                                </div>
+                                <div class="flex justify-between items-center bg-slate-800 rounded-lg p-3">
+                                    <span>Power Bank</span>
+                                    <span class="text-green-400 font-bold">525% margin</span>
+                                </div>
+                                <div class="flex justify-between items-center bg-slate-800 rounded-lg p-3">
+                                    <span>Disposable Camera</span>
+                                    <span class="text-green-400 font-bold">317% margin</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VapeTM Machines Tab -->
+                <div id="calc-machines" class="hidden">
+                    <div class="glass rounded-2xl p-6 border border-slate-700 mb-6">
+                        <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+                            <h3 class="font-semibold flex items-center gap-2">
+                                <i class="fas fa-server text-green-400"></i>VapeTM Machine Catalog
+                            </h3>
+                            <a href="https://vapetm.com" target="_blank" class="text-sm text-blue-400 hover:underline">
+                                <i class="fas fa-external-link-alt mr-1"></i>vapetm.com
+                            </a>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-6">All machines from VapeTM - US-based, ID verification, Nayax card readers, mobile app control.</p>
+
+                        <!-- Wall-Mounted Machines -->
+                        <h4 class="font-medium text-lg mb-4 flex items-center gap-2">
+                            <i class="fas fa-grip-vertical text-blue-400"></i>Wall-Mounted Machines
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                            <div class="bg-slate-800 rounded-xl p-4 border border-slate-600 hover:border-blue-500 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h5 class="font-semibold">Mini Wall</h5>
+                                    <span class="text-green-400 font-bold">$2,850</span>
+                                </div>
+                                <p class="text-slate-400 text-sm mb-3">Most compact wall-mounted option</p>
+                                <div class="flex flex-wrap gap-2 text-xs">
+                                    <span class="bg-slate-700 px-2 py-1 rounded">8 slots</span>
+                                    <span class="bg-slate-700 px-2 py-1 rounded">Touchscreen</span>
+                                    <span class="bg-blue-600 px-2 py-1 rounded">Best for small bars</span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 rounded-xl p-4 border border-slate-600 hover:border-blue-500 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h5 class="font-semibold">Slim Wall</h5>
+                                    <span class="text-green-400 font-bold">$3,450</span>
+                                </div>
+                                <p class="text-slate-400 text-sm mb-3">Sleek, modern design</p>
+                                <div class="flex flex-wrap gap-2 text-xs">
+                                    <span class="bg-slate-700 px-2 py-1 rounded">16 slots</span>
+                                    <span class="bg-slate-700 px-2 py-1 rounded">LED display</span>
+                                    <span class="bg-green-600 px-2 py-1 rounded">Popular choice</span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 rounded-xl p-4 border border-slate-600 hover:border-blue-500 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h5 class="font-semibold">Slim Wall Tin Lift</h5>
+                                    <span class="text-green-400 font-bold">$3,500</span>
+                                </div>
+                                <p class="text-slate-400 text-sm mb-3">Optimized for nicotine pouches (Zyn)</p>
+                                <div class="flex flex-wrap gap-2 text-xs">
+                                    <span class="bg-slate-700 px-2 py-1 rounded">12 slots</span>
+                                    <span class="bg-slate-700 px-2 py-1 rounded">Tin dispenser</span>
+                                    <span class="bg-purple-600 px-2 py-1 rounded">Pouch-focused</span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 rounded-xl p-4 border border-slate-600 hover:border-blue-500 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h5 class="font-semibold">Mega Wall</h5>
+                                    <span class="text-green-400 font-bold">$3,900</span>
+                                </div>
+                                <p class="text-slate-400 text-sm mb-3">High-capacity wall mount</p>
+                                <div class="flex flex-wrap gap-2 text-xs">
+                                    <span class="bg-slate-700 px-2 py-1 rounded">24 slots</span>
+                                    <span class="bg-slate-700 px-2 py-1 rounded">Touchscreen</span>
+                                    <span class="bg-orange-600 px-2 py-1 rounded">High volume</span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 rounded-xl p-4 border border-slate-600 hover:border-blue-500 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h5 class="font-semibold">Mega Wall 2.0</h5>
+                                    <span class="text-green-400 font-bold">$3,950</span>
+                                </div>
+                                <p class="text-slate-400 text-sm mb-3">Latest high-capacity model</p>
+                                <div class="flex flex-wrap gap-2 text-xs">
+                                    <span class="bg-slate-700 px-2 py-1 rounded">24 slots</span>
+                                    <span class="bg-slate-700 px-2 py-1 rounded">Updated design</span>
+                                    <span class="bg-orange-600 px-2 py-1 rounded">High volume</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tower Machines -->
+                        <h4 class="font-medium text-lg mb-4 flex items-center gap-2">
+                            <i class="fas fa-building text-purple-400"></i>Tower / Free-Standing Machines
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                            <div class="bg-slate-800 rounded-xl p-4 border border-slate-600 hover:border-purple-500 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h5 class="font-semibold">Slim Tower</h5>
+                                    <span class="text-green-400 font-bold">$4,500</span>
+                                </div>
+                                <p class="text-slate-400 text-sm mb-3">Sleek free-standing tower</p>
+                                <div class="flex flex-wrap gap-2 text-xs">
+                                    <span class="bg-slate-700 px-2 py-1 rounded">32 slots</span>
+                                    <span class="bg-slate-700 px-2 py-1 rounded">Free-standing</span>
+                                    <span class="bg-green-600 px-2 py-1 rounded">Popular</span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 rounded-xl p-4 border border-purple-500 border-2 hover:border-purple-400 transition relative">
+                                <div class="absolute -top-2 -right-2 bg-purple-500 text-xs px-2 py-1 rounded-full">Recommended</div>
+                                <div class="flex justify-between items-start mb-2">
+                                    <h5 class="font-semibold">Slim Tower 2.0</h5>
+                                    <span class="text-green-400 font-bold">$5,000</span>
+                                </div>
+                                <p class="text-slate-400 text-sm mb-3">43" touchscreen, premium look</p>
+                                <div class="flex flex-wrap gap-2 text-xs">
+                                    <span class="bg-slate-700 px-2 py-1 rounded">32 slots</span>
+                                    <span class="bg-slate-700 px-2 py-1 rounded">43" touch</span>
+                                    <span class="bg-purple-600 px-2 py-1 rounded">Best impression</span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 rounded-xl p-4 border border-slate-600 hover:border-purple-500 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h5 class="font-semibold">Slim Pack Tower 2.0</h5>
+                                    <span class="text-green-400 font-bold">$5,000</span>
+                                </div>
+                                <p class="text-slate-400 text-sm mb-3">Optimized for packaged products</p>
+                                <div class="flex flex-wrap gap-2 text-xs">
+                                    <span class="bg-slate-700 px-2 py-1 rounded">32 slots</span>
+                                    <span class="bg-slate-700 px-2 py-1 rounded">Pack-optimized</span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 rounded-xl p-4 border border-slate-600 hover:border-purple-500 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h5 class="font-semibold">Mega Tower</h5>
+                                    <span class="text-green-400 font-bold">$6,200</span>
+                                </div>
+                                <p class="text-slate-400 text-sm mb-3">Large capacity tower</p>
+                                <div class="flex flex-wrap gap-2 text-xs">
+                                    <span class="bg-slate-700 px-2 py-1 rounded">48 slots</span>
+                                    <span class="bg-slate-700 px-2 py-1 rounded">Large display</span>
+                                    <span class="bg-red-600 px-2 py-1 rounded">High-traffic</span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 rounded-xl p-4 border border-slate-600 hover:border-purple-500 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h5 class="font-semibold">Mega Tower Smart</h5>
+                                    <span class="text-green-400 font-bold">$6,200</span>
+                                </div>
+                                <p class="text-slate-400 text-sm mb-3">32" smart touchscreen</p>
+                                <div class="flex flex-wrap gap-2 text-xs">
+                                    <span class="bg-slate-700 px-2 py-1 rounded">48 slots</span>
+                                    <span class="bg-slate-700 px-2 py-1 rounded">32" touch</span>
+                                    <span class="bg-red-600 px-2 py-1 rounded">Premium</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accessories -->
+                        <h4 class="font-medium text-lg mb-4 flex items-center gap-2">
+                            <i class="fas fa-puzzle-piece text-yellow-400"></i>Essential Accessories
+                        </h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-slate-800 rounded-lg p-4 text-center">
+                                <p class="text-2xl font-bold text-green-400">$300</p>
+                                <p class="text-sm font-medium">ID Scanner</p>
+                                <p class="text-xs text-slate-400">Age verification</p>
+                            </div>
+                            <div class="bg-slate-800 rounded-lg p-4 text-center">
+                                <p class="text-2xl font-bold text-green-400">$350</p>
+                                <p class="text-sm font-medium">Nayax VPOS</p>
+                                <p class="text-xs text-slate-400">Card reader</p>
+                            </div>
+                            <div class="bg-slate-800 rounded-lg p-4 text-center">
+                                <p class="text-2xl font-bold text-green-400">$450</p>
+                                <p class="text-sm font-medium">Pedestal Stand</p>
+                                <p class="text-xs text-slate-400">For wall machines</p>
+                            </div>
+                            <div class="bg-slate-800 rounded-lg p-4 text-center">
+                                <p class="text-2xl font-bold text-green-400">$150</p>
+                                <p class="text-sm font-medium">LED Sign</p>
+                                <p class="text-xs text-slate-400">"Vapes Inside"</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Comparison -->
+                    <div class="glass rounded-2xl p-6 border border-green-700">
+                        <h3 class="font-semibold mb-4 text-green-400 flex items-center gap-2">
+                            <i class="fas fa-balance-scale"></i>Quick Decision Guide
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-slate-800 rounded-xl p-4">
+                                <h4 class="font-medium text-blue-400 mb-2">Small Bar / Limited Space</h4>
+                                <p class="text-2xl font-bold mb-2">Mini Wall</p>
+                                <p class="text-slate-400 text-sm">$2,850 • 8 slots</p>
+                                <p class="text-xs text-slate-500 mt-2">Best for: Dive bars, tight corners</p>
+                            </div>
+                            <div class="bg-slate-800 rounded-xl p-4 border border-green-500">
+                                <h4 class="font-medium text-green-400 mb-2">Most Popular / Best Value</h4>
+                                <p class="text-2xl font-bold mb-2">Slim Tower 2.0</p>
+                                <p class="text-slate-400 text-sm">$5,000 • 32 slots</p>
+                                <p class="text-xs text-slate-500 mt-2">Best for: Most nightlife venues</p>
+                            </div>
+                            <div class="bg-slate-800 rounded-xl p-4">
+                                <h4 class="font-medium text-purple-400 mb-2">High-Traffic / Large Venue</h4>
+                                <p class="text-2xl font-bold mb-2">Mega Tower</p>
+                                <p class="text-slate-400 text-sm">$6,200 • 48 slots</p>
+                                <p class="text-xs text-slate-500 mt-2">Best for: Clubs, large bars</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prospect Detail Page -->
+            <div id="page-detail" class="hidden">
+                <button onclick="showPage('prospects')" class="mb-4 text-slate-400 hover:text-white transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Prospects
+                </button>
+                <div id="detail-content"></div>
+            </div>
+        </main>
+
+        <!-- Quick Call Modal -->
+        <div id="modal-quickcall" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 hidden">
+            <div class="glass rounded-2xl max-w-md w-full p-6 border border-slate-600">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold"><i class="fas fa-phone-volume text-green-400 mr-2"></i>Quick Call</h2>
+                    <button onclick="closeModal('quickcall')" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="quickcall-list" class="space-y-2 max-h-[400px] overflow-y-auto"></div>
+            </div>
+        </div>
+
+        <!-- Scripts Modal -->
+        <div id="modal-scripts" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 hidden">
+            <div class="glass rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6 border border-slate-600">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold"><i class="fas fa-scroll text-purple-400 mr-2"></i>Call Scripts</h2>
+                    <button onclick="closeModal('scripts')" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-slate-800 rounded-xl p-4 border-l-4 border-green-500">
+                        <h3 class="font-semibold text-green-400 mb-2"><i class="fas fa-play mr-2"></i>Opening</h3>
+                        <p class="text-slate-300 italic">"Hey [NAME], this is Jack. I don't know if we've met yet—I've been putting nightlife vending machines in bars around [CITY]. Have you seen one yet?"</p>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl p-4 border-l-4 border-blue-500">
+                        <h3 class="font-semibold text-blue-400 mb-2"><i class="fas fa-gem mr-2"></i>Value Props</h3>
+                        <ul class="text-slate-300 space-y-2">
+                            <li><i class="fas fa-check text-green-400 mr-2"></i>Customers LEAVE to find nicotine—keep them in-house</li>
+                            <li><i class="fas fa-check text-green-400 mr-2"></i>After 3 months, you ATTRACT new customers</li>
+                            <li><i class="fas fa-check text-green-400 mr-2"></i>Turnkey: we buy, stock, maintain. Zero cost to you.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl p-4 border-l-4 border-yellow-500">
+                        <h3 class="font-semibold text-yellow-400 mb-2"><i class="fas fa-shield-alt mr-2"></i>Objections</h3>
+                        <div class="space-y-3 text-sm">
+                            <div><span class="text-red-400">"How big?"</span> → Same as TouchTunes jukebox</div>
+                            <div><span class="text-red-400">"Need a license?"</span> → We handle ALL licensing</div>
+                            <div><span class="text-red-400">"What's the split?"</span> → 15-25%, real value is keeping customers IN</div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl p-4 border-l-4 border-purple-500">
+                        <h3 class="font-semibold text-purple-400 mb-2"><i class="fas fa-bullseye mr-2"></i>Close</h3>
+                        <p class="text-slate-300 italic">"Where do you think this would look best?"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Modal -->
+        <div id="modal-products" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 hidden">
+            <div class="glass rounded-2xl max-w-lg w-full p-6 border border-slate-600">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold"><i class="fas fa-box text-blue-400 mr-2"></i>Quick Prices</h2>
+                    <button onclick="closeModal('products')" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                        <span>Geek Bar / Elf Bar</span>
+                        <span><span class="text-slate-400">$8</span> → <span class="text-green-400 font-bold">$30</span></span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                        <span>Zyn Pouches</span>
+                        <span><span class="text-slate-400">$4</span> → <span class="text-green-400 font-bold">$15</span></span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                        <span>Phone Charger</span>
+                        <span><span class="text-slate-400">$5</span> → <span class="text-green-400 font-bold">$20</span></span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                        <span>Disposable Camera</span>
+                        <span><span class="text-slate-400">$8</span> → <span class="text-green-400 font-bold">$25</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ============ DATA ============
+const statusFlow = [
+    { id: 'not_contacted', label: 'Not Contacted', color: 'bg-slate-600', icon: 'fa-clock' },
+    { id: 'contacted', label: 'Contacted', color: 'bg-blue-600', icon: 'fa-phone' },
+    { id: 'meeting_set', label: 'Meeting Set', color: 'bg-purple-600', icon: 'fa-calendar' },
+    { id: 'negotiating', label: 'Negotiating', color: 'bg-orange-600', icon: 'fa-handshake' },
+    { id: 'won', label: 'Won', color: 'bg-green-600', icon: 'fa-trophy' },
+    { id: 'lost', label: 'Lost', color: 'bg-red-600', icon: 'fa-times' },
+];
+
+// VapeTM Machine Catalog (vapetm.com)
+const machineCosts = { 
+    mini_wall: 2850,        // Mini Wall - Most compact
+    slim_wall: 3450,        // Slim Wall - Sleek
+    slim_wall_tin: 3500,    // Slim Wall Tin Lift - Pouch-only
+    mega_wall: 3900,        // Mega Wall - High capacity
+    mega_wall_2: 3950,      // Mega Wall 2.0
+    slim_tower: 4500,       // Slim Tower - Free standing
+    slim_tower_2: 5000,     // Slim Tower 2.0 - 43" touchscreen
+    slim_pack: 5000,        // Slim Pack Tower 2.0
+    mega_tower: 6200,       // Mega Tower - Large
+    mega_tower_smart: 6200  // Mega Tower Smart - 32" touchscreen
+};
+const machineNames = { 
+    mini_wall: 'Mini Wall',
+    slim_wall: 'Slim Wall', 
+    slim_wall_tin: 'Slim Wall Tin Lift',
+    mega_wall: 'Mega Wall',
+    mega_wall_2: 'Mega Wall 2.0',
+    slim_tower: 'Slim Tower',
+    slim_tower_2: 'Slim Tower 2.0',
+    slim_pack: 'Slim Pack Tower',
+    mega_tower: 'Mega Tower',
+    mega_tower_smart: 'Mega Tower Smart'
+};
+const machineSlots = {
+    mini_wall: 8, slim_wall: 16, slim_wall_tin: 12, mega_wall: 24, mega_wall_2: 24,
+    slim_tower: 32, slim_tower_2: 32, slim_pack: 32, mega_tower: 48, mega_tower_smart: 48
+};
+
+// Product catalog with wholesale suppliers
+const products = [
+    // VAPES - Wholesale: SmokeDirect.com, VapeTM recommended
+    { name: 'Geek Bar Pulse 15000', category: 'Vape', cost: 9.50, price: 32, supplier: 'SmokeDirect', supplierUrl: 'https://smokedirect.com', sku: 'GBP15K', notes: 'Best seller, 15000 puffs' },
+    { name: 'Elf Bar BC5000', category: 'Vape', cost: 7.50, price: 28, supplier: 'SmokeDirect', supplierUrl: 'https://smokedirect.com', sku: 'ELFBC5K', notes: 'Popular classic' },
+    { name: 'Lost Mary OS5000', category: 'Vape', cost: 7.00, price: 28, supplier: 'SmokeDirect', supplierUrl: 'https://smokedirect.com', sku: 'LMOS5K', notes: 'Great flavors' },
+    { name: 'RAZ TN9000', category: 'Vape', cost: 10.00, price: 35, supplier: 'SmokeDirect', supplierUrl: 'https://smokedirect.com', sku: 'RAZ9K', notes: 'Premium, adjustable' },
+    { name: 'Funky Republic Ti7000', category: 'Vape', cost: 8.50, price: 30, supplier: 'SmokeDirect', supplierUrl: 'https://smokedirect.com', sku: 'FRTI7K', notes: 'Rechargeable' },
+    // POUCHES - Wholesale: Nicokick.com, local tobacco distributors
+    { name: 'Zyn 6mg (15ct can)', category: 'Pouch', cost: 3.80, price: 15, supplier: 'Nicokick/Local Dist', supplierUrl: 'https://nicokick.com', sku: 'ZYN6', notes: 'Top seller, cool mint' },
+    { name: 'Zyn 3mg (15ct can)', category: 'Pouch', cost: 3.80, price: 15, supplier: 'Nicokick/Local Dist', supplierUrl: 'https://nicokick.com', sku: 'ZYN3', notes: 'Entry level' },
+    { name: 'On! 4mg (20ct can)', category: 'Pouch', cost: 2.50, price: 12, supplier: 'Nicokick', supplierUrl: 'https://nicokick.com', sku: 'ON4', notes: 'Budget option' },
+    { name: 'Velo 4mg (20ct can)', category: 'Pouch', cost: 3.00, price: 12, supplier: 'Nicokick', supplierUrl: 'https://nicokick.com', sku: 'VELO4', notes: 'Smooth release' },
+    { name: 'Rogue 6mg (20ct can)', category: 'Pouch', cost: 3.20, price: 14, supplier: 'Nicokick', supplierUrl: 'https://nicokick.com', sku: 'ROGUE6', notes: 'Strong' },
+    // ACCESSORIES - Wholesale: Alibaba, Amazon wholesale
+    { name: 'USB-C/Lightning Charger', category: 'Accessory', cost: 2.50, price: 20, supplier: 'Alibaba/Amazon', supplierUrl: 'https://alibaba.com', sku: 'CHG01', notes: '3-in-1 cable, huge margin' },
+    { name: 'Disposable Camera 27exp', category: 'Accessory', cost: 6.00, price: 25, supplier: 'Alibaba', supplierUrl: 'https://alibaba.com/showroom/disposable-camera-bulk.html', sku: 'CAM27', notes: 'Party favorite, Kodak film' },
+    { name: 'Power Bank 5000mAh', category: 'Accessory', cost: 4.00, price: 25, supplier: 'Alibaba', supplierUrl: 'https://alibaba.com', sku: 'PWR5K', notes: 'Emergency power' },
+    // OTHER - VapeTM sells some, Amazon/wholesale for others
+    { name: 'Morning Recovery (bottle)', category: 'Other', cost: 4.00, price: 15, supplier: 'VapeTM/Amazon', supplierUrl: 'https://vapetm.com', sku: 'MRCVR', notes: 'Hangover prevention' },
+    { name: 'Liquid IV Packet', category: 'Other', cost: 1.50, price: 8, supplier: 'Costco/Amazon', supplierUrl: 'https://amazon.com', sku: 'LIV01', notes: 'Hydration' },
+    { name: 'Advil 2-pack', category: 'Other', cost: 0.35, price: 5, supplier: 'Costco Bulk', supplierUrl: 'https://costco.com', sku: 'ADV2', notes: '1300% margin!' },
+    { name: 'Gum 3-pack', category: 'Other', cost: 0.25, price: 3, supplier: 'Costco Bulk', supplierUrl: 'https://costco.com', sku: 'GUM3', notes: 'Breath freshener' },
+];
+
+const initialProspects = [
+    { id: 1, name: "Fat Tuesday", address: "680 S Mill Ave", city: "Tempe", area: "ASU/Tempe", rating: 4.2, reviews: 1378, phone: "(480) 967-3917", website: "fattuesdayaz.com", estMonthly: 1800, priority: "A+", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "slim_tower_2" },
+    { id: 2, name: "Yucca Tap Room", address: "29 W Southern Ave", city: "Tempe", area: "ASU/Tempe", rating: 4.5, reviews: 1711, phone: "(480) 967-4777", website: "yuccatap.com", estMonthly: 1700, priority: "A+", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "slim_tower_2" },
+    { id: 3, name: "Pedal Haus Brewery", address: "730 S Mill Ave #102", city: "Tempe", area: "ASU/Tempe", rating: 4.5, reviews: 1934, phone: "(480) 314-2337", website: "pedalhausbrewery.com", estMonthly: 1650, priority: "A+", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "slim_tower_2" },
+    { id: 4, name: "Mill's Modern Social", address: "83 E Broadway Rd", city: "Tempe", area: "ASU/Tempe", rating: 4.3, reviews: 1667, phone: "(602) 689-5361", website: "millsmodernsocial.com", estMonthly: 1650, priority: "A+", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "slim_tower_2" },
+    { id: 5, name: "Pattie's First Avenue", address: "7220 E 1st Ave", city: "Scottsdale", area: "Old Town Scottsdale", rating: 4.3, reviews: 1763, phone: "(480) 990-0103", website: "pattiesfirstavenuelounge.com", estMonthly: 1600, priority: "A+", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "slim_tower_2" },
+    { id: 6, name: "Dierks Whiskey Row", address: "4420 N Saddlebag Trail", city: "Scottsdale", area: "Old Town Scottsdale", rating: 3.8, reviews: 1468, phone: "(480) 945-4200", website: "dierkswhiskeyrow.com", estMonthly: 1600, priority: "A+", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 25, machineType: "mega_tower" },
+    { id: 7, name: "Boondocks Scottsdale", address: "4341 N 75th St", city: "Scottsdale", area: "Old Town Scottsdale", rating: 4.3, reviews: 1750, phone: "(480) 949-8454", website: "boondocksaz.com", estMonthly: 1550, priority: "A+", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "slim_tower_2" },
+    { id: 8, name: "Collins Irish Pub", address: "2 N Leroux St", city: "Flagstaff", area: "Flagstaff", rating: 4.0, reviews: 2184, phone: "(928) 214-7363", website: "collinsirishpub.com", estMonthly: 1500, priority: "A+", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "mega_wall" },
+    { id: 9, name: "Rusty Spur Saloon", address: "7245 E Main St", city: "Scottsdale", area: "Old Town Scottsdale", rating: 4.5, reviews: 1647, phone: "(480) 425-7787", website: "rustyspursaloon.com", estMonthly: 1500, priority: "A+", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "mega_wall" },
+    { id: 10, name: "BJ's Cabana Bar", address: "2122 McCulloch Blvd N", city: "Lake Havasu City", area: "Lake Havasu", rating: 4.2, reviews: 982, phone: "(928) 854-2122", website: "bjscabanabar.com", estMonthly: 1350, priority: "A", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "slim_tower" },
+    { id: 11, name: "Flying X Saloon", address: "2030 McCulloch Blvd N", city: "Lake Havasu City", area: "Lake Havasu", rating: 4.5, reviews: 797, phone: "(928) 854-3599", website: "flyingxsaloon.com", estMonthly: 1200, priority: "A", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "mega_wall" },
+    { id: 12, name: "McKee's Pub & Grill", address: "2112 McCulloch Blvd N", city: "Lake Havasu City", area: "Lake Havasu", rating: 4.4, reviews: 711, phone: "(928) 453-8400", website: "mckeespubgrill.shop", estMonthly: 1150, priority: "A", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "slim_wall" },
+    { id: 13, name: "The Office Lounge", address: "2180 W Acoma Blvd", city: "Lake Havasu City", area: "Lake Havasu", rating: 4.6, reviews: 521, phone: "(928) 855-9583", website: "officebarhavasu.com", estMonthly: 1050, priority: "A", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "slim_wall" },
+    { id: 14, name: "R Bar and Grill", address: "3185 Maricopa Ave", city: "Lake Havasu City", area: "Lake Havasu", rating: 4.5, reviews: 510, phone: "(928) 453-3876", website: "", estMonthly: 1000, priority: "A", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 15, machineType: "slim_wall" },
+    { id: 15, name: "Wasted Grain", address: "7295 E Stetson Dr", city: "Scottsdale", area: "Old Town Scottsdale", rating: 4.3, reviews: 1324, phone: "(480) 970-0500", website: "wastedgrain.com", estMonthly: 1400, priority: "A", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 25, machineType: "mega_tower" },
+    { id: 16, name: "Old Town Tavern", address: "7330 E Main St", city: "Scottsdale", area: "Old Town Scottsdale", rating: 4.5, reviews: 1188, phone: "(480) 306-7320", website: "oldtowntavernaz.com", estMonthly: 1350, priority: "A", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "mega_wall" },
+    { id: 17, name: "Low Key Piano Bar", address: "501 S Mill Ave", city: "Tempe", area: "ASU/Tempe", rating: 4.2, reviews: 1127, phone: "(480) 355-1705", website: "lowkeypianobar.com", estMonthly: 1450, priority: "A", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "mega_wall" },
+    { id: 18, name: "Uptown Pubhouse", address: "114 N Leroux St", city: "Flagstaff", area: "Flagstaff", rating: 4.5, reviews: 674, phone: "(928) 773-0551", website: "uptownpubhouse.com", estMonthly: 1050, priority: "A", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "slim_wall" },
+    { id: 19, name: "Dirty Birdies", address: "2285 E Butler Ave", city: "Flagstaff", area: "Flagstaff", rating: 4.2, reviews: 900, phone: "(928) 440-4502", website: "dirtybirdiesbargrill.com", estMonthly: 1100, priority: "A", status: "not_contacted", owner: "", notes: "", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 20, machineType: "mega_wall" },
+    { id: 20, name: "Glitch Barcadium", address: "44 Mulberry Ave", city: "Lake Havasu City", area: "Lake Havasu", rating: 4.9, reviews: 158, phone: "(928) 302-1006", website: "glitchbarcadium.com", estMonthly: 700, priority: "B", status: "not_contacted", owner: "", notes: "Arcade bar - younger crowd", lastContact: "", nextAction: "", meetingDate: "", proposedSplit: 15, machineType: "mini_wall" },
+];
+
+let prospects = [];
+
+// ============ STORAGE ============
+function loadData() {
+    const saved = localStorage.getItem('vapeVendProData');
+    prospects = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(initialProspects));
+}
+
+function saveData() {
+    localStorage.setItem('vapeVendProData', JSON.stringify(prospects));
+}
+
+// ============ NAVIGATION ============
+function showPage(page) {
+    ['dashboard', 'prospects', 'pipeline', 'calculator', 'detail'].forEach(p => {
+        document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
+        const nav = document.getElementById('nav-' + p);
+        if (nav) {
+            nav.classList.toggle('tab-active', p === page);
+            nav.classList.toggle('hover:bg-slate-700', p !== page);
+        }
+    });
+    if (page === 'dashboard') renderDashboard();
+    if (page === 'prospects') { initFilters(); renderProspects(); }
+    if (page === 'pipeline') renderPipeline();
+    if (page === 'calculator') { updateWhatIf(); renderProducts(); }
+}
+
+function showCalcTab(tab) {
+    ['whatif', 'pipeline-pl', 'costs', 'products', 'machines'].forEach(t => {
+        const el = document.getElementById('calc-' + t);
+        const btn = document.getElementById('calc-tab-' + t);
+        if (el) el.classList.toggle('hidden', t !== tab);
+        if (btn) {
+            btn.classList.toggle('subtab-active', t === tab);
+            btn.classList.toggle('bg-slate-700', t !== tab);
+        }
+    });
+    if (tab === 'pipeline-pl') renderPipelinePL();
+    if (tab === 'products') renderProducts();
+}
+
+function showQuickCall() { renderQuickCall(); document.getElementById('modal-quickcall').classList.remove('hidden'); }
+function showScripts() { document.getElementById('modal-scripts').classList.remove('hidden'); }
+function showProducts() { document.getElementById('modal-products').classList.remove('hidden'); }
+function closeModal(name) { document.getElementById('modal-' + name).classList.add('hidden'); }
+
+// ============ DASHBOARD ============
+function renderDashboard() {
+    const pipeline = prospects.filter(p => p.status !== 'lost').reduce((s, p) => s + p.estMonthly, 0);
+    const active = prospects.filter(p => ['contacted', 'meeting_set', 'negotiating'].includes(p.status)).length;
+    const won = prospects.filter(p => p.status === 'won');
+    const wonRev = won.reduce((s, p) => s + p.estMonthly, 0);
+    const contacted = prospects.filter(p => p.status !== 'not_contacted').length;
+    const conversion = contacted > 0 ? Math.round((won.length / contacted) * 100) : 0;
+
+    document.getElementById('kpi-pipeline').textContent = '$' + pipeline.toLocaleString();
+    document.getElementById('kpi-active').textContent = active;
+    document.getElementById('kpi-won').textContent = won.length;
+    document.getElementById('kpi-won-rev').textContent = '$' + wonRev.toLocaleString() + '/mo locked';
+    document.getElementById('kpi-conversion').textContent = conversion + '%';
+
+    const top5 = prospects.filter(p => p.status !== 'lost').sort((a, b) => b.estMonthly - a.estMonthly).slice(0, 5);
+    const top5Rev = top5.reduce((s, p) => s + p.estMonthly, 0);
+    const annualNet = top5Rev * 12 * 0.4 * 0.8;
+    document.getElementById('proj-top5').textContent = '$' + top5Rev.toLocaleString() + '/mo';
+    document.getElementById('proj-annual').textContent = '$' + Math.round(annualNet).toLocaleString();
+    document.getElementById('proj-bar').style.width = Math.min(100, (annualNet / 100000) * 100) + '%';
+
+    const actions = [];
+    prospects.filter(p => p.status === 'not_contacted' && p.priority === 'A+').slice(0, 3).forEach(p => {
+        actions.push({ icon: 'fa-phone', color: 'text-green-400', text: `Call ${p.name}`, sub: p.city, id: p.id });
+    });
+    prospects.filter(p => p.status === 'meeting_set').forEach(p => {
+        actions.push({ icon: 'fa-calendar-check', color: 'text-purple-400', text: `Meeting: ${p.name}`, sub: p.meetingDate || 'TBD', id: p.id });
+    });
+
+    document.getElementById('today-actions').innerHTML = actions.length ? actions.map(a => `
+        <div onclick="showProspectDetail(${a.id})" class="flex items-center gap-3 p-3 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition">
+            <i class="fas ${a.icon} ${a.color}"></i>
+            <div class="flex-1"><p class="font-medium">${a.text}</p><p class="text-xs text-slate-400">${a.sub}</p></div>
+            <i class="fas fa-chevron-right text-slate-500"></i>
+        </div>
+    `).join('') : '<p class="text-slate-500 text-center py-4">All caught up! 🎉</p>';
+
+    const areas = {};
+    prospects.forEach(p => {
+        if (!areas[p.area]) areas[p.area] = { count: 0, value: 0, won: 0 };
+        areas[p.area].count++;
+        areas[p.area].value += p.estMonthly;
+        if (p.status === 'won') areas[p.area].won++;
+    });
+    document.getElementById('area-breakdown').innerHTML = Object.entries(areas).map(([area, data]) => `
+        <div class="bg-slate-800 rounded-xl p-4">
+            <p class="font-medium text-sm mb-2">${area}</p>
+            <p class="text-2xl font-bold">${data.count}</p>
+            <p class="text-xs text-slate-400">${data.won} won • $${data.value.toLocaleString()}/mo</p>
+        </div>
+    `).join('');
+}
+
+// ============ PROSPECTS ============
+function initFilters() {
+    const areas = [...new Set(prospects.map(p => p.area))];
+    document.getElementById('filter-area').innerHTML = '<option value="all">All Areas</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+    document.getElementById('filter-status').innerHTML = '<option value="all">All Status</option>' + statusFlow.map(s => `<option value="${s.id}">${s.label}</option>`).join('');
+}
+
+function renderProspects() {
+    const search = document.getElementById('search-input').value.toLowerCase();
+    const area = document.getElementById('filter-area').value;
+    const priority = document.getElementById('filter-priority').value;
+    const status = document.getElementById('filter-status').value;
+
+    let filtered = prospects.filter(p => {
+        if (search && !p.name.toLowerCase().includes(search) && !p.city.toLowerCase().includes(search)) return false;
+        if (area !== 'all' && p.area !== area) return false;
+        if (priority !== 'all' && p.priority !== priority) return false;
+        if (status !== 'all' && p.status !== status) return false;
+        return true;
+    });
+
+    document.getElementById('filter-count').textContent = `${filtered.length} of ${prospects.length}`;
+
+    document.getElementById('prospect-list').innerHTML = filtered.map(p => {
+        const st = statusFlow.find(s => s.id === p.status);
+        return `
+        <div onclick="showProspectDetail(${p.id})" class="glass rounded-xl p-4 border border-slate-700 cursor-pointer card-hover transition priority-${p.priority.toLowerCase().replace('+', '-plus')}">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <div class="flex-1 min-w-[180px]">
+                    <div class="flex items-center gap-2 flex-wrap mb-1">
+                        <h3 class="font-semibold">${p.name}</h3>
+                        <span class="px-2 py-0.5 rounded text-xs font-bold ${p.priority === 'A+' ? 'bg-green-600' : p.priority === 'A' ? 'bg-blue-600' : 'bg-yellow-600'}">${p.priority}</span>
+                        <span class="px-2 py-0.5 rounded text-xs ${st.color}"><i class="fas ${st.icon} mr-1"></i>${st.label}</span>
+                    </div>
+                    <p class="text-slate-400 text-sm">${p.city} • ${p.area}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-green-400 font-bold text-lg">$${p.estMonthly.toLocaleString()}</p>
+                    <a href="tel:${p.phone}" onclick="event.stopPropagation()" class="text-blue-400 text-sm hover:underline">${p.phone}</a>
+                </div>
+            </div>
+        </div>
+    `}).join('');
+}
+
+// ============ PROSPECT DETAIL ============
+function showProspectDetail(id) {
+    const p = prospects.find(x => x.id === id);
+    if (!p) return;
+
+    const st = statusFlow.find(s => s.id === p.status);
+    const cost = machineCosts[p.machineType];
+    const monthlyProfit = p.estMonthly * 0.65 * (1 - p.proposedSplit / 100);
+    const payback = Math.ceil(cost / monthlyProfit);
+
+    document.getElementById('detail-content').innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="glass rounded-2xl p-6 border border-slate-700">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h2 class="text-2xl font-bold mb-1">${p.name}</h2>
+                            <p class="text-slate-400">${p.address}, ${p.city}</p>
+                            <p class="text-slate-500 text-sm">${p.area} • ⭐ ${p.rating} (${p.reviews.toLocaleString()} reviews)</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-lg text-sm font-bold ${p.priority === 'A+' ? 'bg-green-600' : p.priority === 'A' ? 'bg-blue-600' : 'bg-yellow-600'}">${p.priority}</span>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="tel:${p.phone}" class="flex-1 min-w-[120px] flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 rounded-lg px-4 py-3"><i class="fas fa-phone"></i> Call</a>
+                        <a href="https://${p.website}" target="_blank" class="flex-1 min-w-[120px] flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 rounded-lg px-4 py-3"><i class="fas fa-globe"></i> Website</a>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address + ', ' + p.city + ', AZ')}" target="_blank" class="flex-1 min-w-[120px] flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 rounded-lg px-4 py-3"><i class="fas fa-map-marker-alt"></i> Map</a>
+                    </div>
+                </div>
+                <div class="glass rounded-2xl p-6 border border-slate-700">
+                    <h3 class="font-semibold mb-4">Deal Status</h3>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        ${statusFlow.filter(s => s.id !== 'lost').map(s => `
+                            <button onclick="updateStatus(${p.id}, '${s.id}')" class="px-4 py-2 rounded-lg text-sm font-medium transition ${p.status === s.id ? s.color + ' ring-2 ring-white/30' : 'bg-slate-700 hover:bg-slate-600'}">
+                                <i class="fas ${s.icon} mr-1"></i>${s.label}
+                            </button>
+                        `).join('')}
+                        <button onclick="updateStatus(${p.id}, 'lost')" class="px-4 py-2 rounded-lg text-sm font-medium bg-slate-800 hover:bg-red-600"><i class="fas fa-times mr-1"></i>Lost</button>
+                    </div>
+                </div>
+                <div class="glass rounded-2xl p-6 border border-slate-700">
+                    <h3 class="font-semibold mb-4">Notes & Follow-up</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Owner/Contact</label>
+                            <input type="text" id="detail-owner" value="${p.owner}" onchange="updateField(${p.id}, 'owner', this.value)" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" placeholder="e.g., Mike">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Meeting Date</label>
+                            <input type="date" id="detail-meeting" value="${p.meetingDate}" onchange="updateField(${p.id}, 'meetingDate', this.value)" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm text-slate-400 mb-1">Next Action</label>
+                        <input type="text" value="${p.nextAction}" onchange="updateField(${p.id}, 'nextAction', this.value)" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" placeholder="e.g., Follow up Thursday">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1">Notes</label>
+                        <textarea onchange="updateField(${p.id}, 'notes', this.value)" rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" placeholder="Call notes, objections...">${p.notes}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <div class="glass rounded-2xl p-6 border border-green-700">
+                    <h3 class="text-green-400 font-semibold mb-4">Revenue Potential</h3>
+                    <p class="text-4xl font-bold mb-2">$${p.estMonthly.toLocaleString()}<span class="text-lg text-slate-400">/mo</span></p>
+                    <div class="border-t border-slate-600 pt-4 mt-4 space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-400">Gross profit (65%):</span><span>$${Math.round(p.estMonthly * 0.65)}/mo</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">After ${p.proposedSplit}% split:</span><span class="text-green-400 font-bold">$${Math.round(monthlyProfit)}/mo</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">Annual net:</span><span class="text-green-400 font-bold">$${Math.round(monthlyProfit * 12).toLocaleString()}</span></div>
+                    </div>
+                </div>
+                <div class="glass rounded-2xl p-6 border border-slate-700">
+                    <h3 class="font-semibold mb-4">Deal Config</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Machine Type</label>
+                            <select onchange="updateField(${p.id}, 'machineType', this.value); showProspectDetail(${p.id})" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2">
+                                ${Object.entries(machineNames).map(([k, v]) => `<option value="${k}" ${p.machineType === k ? 'selected' : ''}>${v} ($${machineCosts[k].toLocaleString()})</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Bar Split: ${p.proposedSplit}%</label>
+                            <input type="range" min="0" max="50" step="5" value="${p.proposedSplit}" onchange="updateField(${p.id}, 'proposedSplit', parseInt(this.value)); showProspectDetail(${p.id})" class="w-full">
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-600 text-sm">
+                        <div class="flex justify-between mb-2"><span class="text-slate-400">Machine cost:</span><span>$${cost.toLocaleString()}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">Payback:</span><span class="font-bold ${payback <= 12 ? 'text-green-400' : 'text-yellow-400'}">${payback} months</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    showPage('detail');
+}
+
+function updateStatus(id, status) {
+    const p = prospects.find(x => x.id === id);
+    if (p) { p.status = status; p.lastContact = new Date().toISOString().split('T')[0]; saveData(); showProspectDetail(id); }
+}
+
+function updateField(id, field, value) {
+    const p = prospects.find(x => x.id === id);
+    if (p) { p[field] = value; saveData(); }
+}
+
+// ============ PIPELINE ============
+function renderPipeline() {
+    const columns = statusFlow.filter(s => s.id !== 'lost');
+    document.getElementById('pipeline-board').innerHTML = columns.map(col => {
+        const items = prospects.filter(p => p.status === col.id);
+        const total = items.reduce((s, p) => s + p.estMonthly, 0);
+        return `
+            <div class="glass rounded-xl border border-slate-700 overflow-hidden">
+                <div class="p-3 ${col.color} flex items-center justify-between">
+                    <span class="font-medium text-sm"><i class="fas ${col.icon} mr-2"></i>${col.label}</span>
+                    <span class="text-xs bg-black/20 px-2 py-1 rounded">${items.length}</span>
+                </div>
+                <div class="p-2 space-y-2 min-h-[200px] max-h-[500px] overflow-y-auto">
+                    ${items.map(p => `
+                        <div onclick="showProspectDetail(${p.id})" class="bg-slate-800 rounded-lg p-3 cursor-pointer hover:bg-slate-700">
+                            <p class="font-medium text-sm">${p.name}</p>
+                            <p class="text-xs text-slate-400">${p.city}</p>
+                            <p class="text-xs text-green-400 mt-1">$${p.estMonthly}/mo</p>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="p-2 border-t border-slate-700 text-xs text-slate-400">$${total.toLocaleString()}/mo</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ============ WHAT-IF CALCULATOR ============
+function updateWhatIf() {
+    const machines = parseInt(document.getElementById('wif-machines').value) || 5;
+    const machineCost = parseInt(document.getElementById('wif-machine-type').value);
+    const revenue = parseInt(document.getElementById('wif-revenue').value);
+    const cogsPct = parseInt(document.getElementById('wif-cogs').value);
+    const splitPct = parseInt(document.getElementById('wif-split').value);
+    const opCosts = parseInt(document.getElementById('wif-opcosts').value) || 0;
+
+    document.getElementById('wif-machines-range').value = machines;
+    document.getElementById('wif-num').textContent = machines;
+
+    // Startup costs
+    const totalMachineCost = machines * machineCost;
+    const invCost = machines * revenue * (cogsPct / 100) * 0.5; // ~half month inventory x2
+    const signCost = machines * 20;
+    const cardCost = machines * 100;
+    const totalStartup = totalMachineCost + invCost + 12 + signCost + cardCost;
+
+    document.getElementById('wif-machine-cost').textContent = '$' + totalMachineCost.toLocaleString();
+    document.getElementById('wif-inv-cost').textContent = '$' + Math.round(invCost).toLocaleString();
+    document.getElementById('wif-sign-cost').textContent = '$' + signCost;
+    document.getElementById('wif-card-cost').textContent = '$' + cardCost;
+    document.getElementById('wif-total-startup').textContent = '$' + Math.round(totalStartup).toLocaleString();
+
+    // Monthly P/L
+    const gross = machines * revenue;
+    const cogsAmt = gross * (cogsPct / 100);
+    const gp = gross - cogsAmt;
+    const splitAmt = gp * (splitPct / 100);
+    const net = gp - splitAmt - opCosts;
+
+    document.getElementById('wif-gross').textContent = '$' + gross.toLocaleString();
+    document.getElementById('wif-cogs-pct').textContent = cogsPct;
+    document.getElementById('wif-cogs-amt').textContent = '-$' + Math.round(cogsAmt).toLocaleString();
+    document.getElementById('wif-gp').textContent = '$' + Math.round(gp).toLocaleString();
+    document.getElementById('wif-split-pct').textContent = splitPct;
+    document.getElementById('wif-split-amt').textContent = '-$' + Math.round(splitAmt).toLocaleString();
+    document.getElementById('wif-op-amt').textContent = '-$' + opCosts.toLocaleString();
+    document.getElementById('wif-net').textContent = '$' + Math.round(net).toLocaleString();
+
+    // Annual & ROI
+    const annual = net * 12;
+    const payback = net > 0 ? (totalStartup / net) : 999;
+    const roi1 = ((annual - totalStartup) / totalStartup) * 100;
+    const roi2 = (annual / totalStartup) * 100;
+    const marginPct = (net / gross) * 100;
+
+    document.getElementById('wif-annual').textContent = '$' + Math.round(annual).toLocaleString();
+    document.getElementById('wif-payback').textContent = payback < 99 ? payback.toFixed(1) + ' months' : 'N/A';
+    document.getElementById('wif-roi1').textContent = roi1.toFixed(0) + '%';
+    document.getElementById('wif-roi1').className = roi1 >= 0 ? 'font-bold text-green-400' : 'font-bold text-red-400';
+    document.getElementById('wif-roi2').textContent = roi2.toFixed(0) + '%';
+    document.getElementById('wif-roi-bar').style.width = Math.min(100, Math.max(0, marginPct * 2)) + '%';
+    document.getElementById('wif-margin-pct').textContent = marginPct.toFixed(0) + '%';
+}
+
+// ============ PIPELINE P/L ============
+function renderPipelinePL() {
+    const activeDeals = prospects.filter(p => !['lost'].includes(p.status));
+    
+    let totalMachine = 0, totalRev = 0, totalNet = 0;
+    const rows = activeDeals.map(p => {
+        const cost = machineCosts[p.machineType];
+        const monthlyNet = p.estMonthly * 0.65 * (1 - p.proposedSplit / 100);
+        const payback = Math.ceil(cost / monthlyNet);
+        
+        totalMachine += cost;
+        totalRev += p.estMonthly;
+        totalNet += monthlyNet;
+        
+        const st = statusFlow.find(s => s.id === p.status);
+        return `
+            <tr class="border-b border-slate-700 hover:bg-slate-800 cursor-pointer" onclick="showProspectDetail(${p.id})">
+                <td class="p-4">
+                    <p class="font-medium">${p.name}</p>
+                    <p class="text-xs text-slate-400">${p.city}</p>
+                </td>
+                <td class="p-4"><span class="px-2 py-1 rounded text-xs ${st.color}">${st.label}</span></td>
+                <td class="p-4 text-slate-400">${machineNames[p.machineType]}</td>
+                <td class="p-4 text-right">$${cost.toLocaleString()}</td>
+                <td class="p-4 text-right">$${p.estMonthly.toLocaleString()}</td>
+                <td class="p-4 text-right text-slate-400">${p.proposedSplit}%</td>
+                <td class="p-4 text-right text-green-400">$${Math.round(monthlyNet).toLocaleString()}</td>
+                <td class="p-4 text-right ${payback <= 12 ? 'text-green-400' : 'text-yellow-400'}">${payback}mo</td>
+            </tr>
+        `;
+    });
+
+    document.getElementById('pl-table').innerHTML = rows.join('');
+    document.getElementById('pl-total-machine').textContent = '$' + totalMachine.toLocaleString();
+    document.getElementById('pl-total-rev').textContent = '$' + totalRev.toLocaleString();
+    document.getElementById('pl-total-net').textContent = '$' + Math.round(totalNet).toLocaleString();
+    document.getElementById('pl-avg-payback').textContent = totalNet > 0 ? Math.ceil(totalMachine / totalNet) + 'mo' : '-';
+
+    document.getElementById('pl-startup').textContent = '$' + totalMachine.toLocaleString();
+    document.getElementById('pl-monthly-rev').textContent = '$' + totalRev.toLocaleString();
+    document.getElementById('pl-monthly-net').textContent = '$' + Math.round(totalNet).toLocaleString();
+    document.getElementById('pl-annual').textContent = '$' + Math.round(totalNet * 12).toLocaleString();
+}
+
+// ============ PRODUCTS ============
+function renderProducts() {
+    document.getElementById('product-table').innerHTML = products.map(p => {
+        const profit = p.price - p.cost;
+        const margin = Math.round((profit / p.cost) * 100);
+        return `
+            <tr class="border-b border-slate-700 hover:bg-slate-800">
+                <td class="py-3">
+                    <p class="font-medium">${p.name}</p>
+                    <p class="text-xs text-slate-500">${p.notes}</p>
+                </td>
+                <td class="py-3"><span class="px-2 py-1 rounded text-xs ${p.category === 'Vape' ? 'bg-green-600' : p.category === 'Pouch' ? 'bg-blue-600' : p.category === 'Accessory' ? 'bg-purple-600' : 'bg-slate-600'}">${p.category}</span></td>
+                <td class="py-3"><a href="${p.supplierUrl}" target="_blank" class="text-blue-400 hover:underline text-xs">${p.supplier}</a></td>
+                <td class="py-3 text-right text-slate-400">$${p.cost.toFixed(2)}</td>
+                <td class="py-3 text-right font-bold">$${p.price}</td>
+                <td class="py-3 text-right text-green-400">$${profit.toFixed(2)}</td>
+                <td class="py-3 text-right"><span class="${margin >= 300 ? 'text-green-400 font-bold' : margin >= 200 ? 'text-green-400' : 'text-yellow-400'}">${margin}%</span></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// ============ QUICK CALL ============
+function renderQuickCall() {
+    const callList = prospects.filter(p => p.status === 'not_contacted').sort((a, b) => {
+        if (a.priority === 'A+' && b.priority !== 'A+') return -1;
+        if (b.priority === 'A+' && a.priority !== 'A+') return 1;
+        return b.estMonthly - a.estMonthly;
+    }).slice(0, 10);
+
+    document.getElementById('quickcall-list').innerHTML = callList.map(p => `
+        <a href="tel:${p.phone}" class="flex items-center justify-between p-3 bg-slate-800 rounded-lg hover:bg-slate-700">
+            <div><p class="font-medium">${p.name}</p><p class="text-xs text-slate-400">${p.city} • $${p.estMonthly}/mo</p></div>
+            <div class="flex items-center gap-3">
+                <span class="px-2 py-0.5 rounded text-xs ${p.priority === 'A+' ? 'bg-green-600' : 'bg-blue-600'}">${p.priority}</span>
+                <i class="fas fa-phone text-green-400"></i>
+            </div>
+        </a>
+    `).join('');
+}
+
+// ============ INIT ============
+loadData();
+renderDashboard();
+</script>
+</body>
+</html>
