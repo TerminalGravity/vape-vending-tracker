@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { initialProspects, statusOptions, profitSplitGuide, callScript, productCatalog, suppliers, vapeTmMachines, accessories } from '../lib/data';
+import { initialProspects, statusOptions, profitSplitGuide, callScript, productCatalog, suppliers, vapeTmMachines, accessories, scoringMethodology } from '../lib/data';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -11,6 +11,7 @@ export default function Home() {
   const [showQuickCall, setShowQuickCall] = useState(false);
   const [filterArea, setFilterArea] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [filterPriority, setFilterPriority] = useState('all');
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -49,6 +50,7 @@ export default function Home() {
   const filtered = prospects.filter(p => {
     if (filterArea !== 'all' && p.area !== filterArea) return false;
     if (filterStatus !== 'all' && p.status !== filterStatus) return false;
+    if (filterPriority !== 'all' && p.priority !== filterPriority) return false;
     if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
@@ -155,6 +157,13 @@ export default function Home() {
                 <option value="all">All Status</option>
                 {statusOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
+              <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)} className="bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-sm">
+                <option value="all">All Priority</option>
+                <option value="A+">A+ (Top Tier)</option>
+                <option value="A">A (High)</option>
+                <option value="B">B (Medium)</option>
+                <option value="C">C (Lower)</option>
+              </select>
             </div>
             <p className="text-gray-400 text-sm">{filtered.length} prospects</p>
             <div className="space-y-2">
@@ -162,12 +171,22 @@ export default function Home() {
                 <div key={p.id} onClick={() => setSelectedId(p.id)} className="bg-gray-800 rounded-lg p-3 border border-gray-700 hover:border-blue-500 cursor-pointer">
                   <div className="flex justify-between items-start">
                     <div>
-                      <div className="flex items-center gap-2"><h3 className="font-semibold">{p.name}</h3><span className={`px-2 py-0.5 rounded text-xs ${statusOptions.find(s=>s.value===p.status)?.color}`}>{statusOptions.find(s=>s.value===p.status)?.label}</span></div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{p.name}</h3>
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${p.priority === 'A+' ? 'bg-green-600' : p.priority === 'A' ? 'bg-blue-600' : p.priority === 'B' ? 'bg-yellow-600' : 'bg-gray-600'}`}>{p.priority}</span>
+                        <span className={`px-2 py-0.5 rounded text-xs ${statusOptions.find(s=>s.value===p.status)?.color}`}>{statusOptions.find(s=>s.value===p.status)?.label}</span>
+                      </div>
                       <p className="text-sm text-gray-400">{p.city} • {p.area}</p>
+                      <div className="flex gap-3 mt-1 text-xs">
+                        <span title="Hours Score (2AM=10)">🕐 {p.hoursScore || '-'}</span>
+                        <span title="Traffic Score (reviews)">👥 {p.trafficScore || '-'}</span>
+                        <span title="Demo Score (target demo)">🎯 {p.demoScore || '-'}</span>
+                        <span className="text-gray-500">⭐ {p.rating} ({p.reviews})</span>
+                      </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-green-400 font-bold">${p.estMonthly}/mo</p>
-                      <p className="text-xs text-gray-500">{p.priority}</p>
+                      <p className="text-green-400 font-bold">${p.estMonthly?.toLocaleString()}/mo</p>
+                      <p className="text-xs text-gray-500">${p.estAnnual?.toLocaleString()}/yr</p>
                     </div>
                   </div>
                 </div>
@@ -186,6 +205,12 @@ export default function Home() {
                   <h2 className="text-xl font-bold">{selectedProspect.name}</h2>
                   <p className="text-gray-400">{selectedProspect.address}, {selectedProspect.city}</p>
                   <p className="text-gray-500 text-sm">{selectedProspect.area} • ⭐ {selectedProspect.rating} ({selectedProspect.reviews} reviews)</p>
+                  <div className="flex gap-4 mt-2 text-sm">
+                    <div className="bg-gray-700 rounded px-2 py-1"><span className="text-gray-400">Hours:</span> <span className="font-bold text-blue-400">{selectedProspect.hoursScore}/10</span></div>
+                    <div className="bg-gray-700 rounded px-2 py-1"><span className="text-gray-400">Traffic:</span> <span className="font-bold text-green-400">{selectedProspect.trafficScore}/10</span></div>
+                    <div className="bg-gray-700 rounded px-2 py-1"><span className="text-gray-400">Demo:</span> <span className="font-bold text-purple-400">{selectedProspect.demoScore}/10</span></div>
+                    <div className="bg-gray-700 rounded px-2 py-1"><span className="text-gray-400">Total:</span> <span className="font-bold text-yellow-400">{(selectedProspect.hoursScore||0)+(selectedProspect.trafficScore||0)+(selectedProspect.demoScore||0)}/30</span></div>
+                  </div>
                 </div>
                 <span className={`px-3 py-1 rounded text-sm ${statusOptions.find(s=>s.value===selectedProspect.status)?.color}`}>{statusOptions.find(s=>s.value===selectedProspect.status)?.label}</span>
               </div>
