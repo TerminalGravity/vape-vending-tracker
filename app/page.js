@@ -199,6 +199,9 @@ function VapeVendPro() {
             </div>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <a href="/forecaster"><TrendingUp className="h-4 w-4 mr-1" /> Forecaster</a>
+            </Button>
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm"><Phone className="h-4 w-4 mr-1" /> Quick Call</Button>
